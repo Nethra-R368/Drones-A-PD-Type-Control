@@ -23,7 +23,7 @@
 |------|------------|
 | Nethra R | CB.SC.U4AIE24147 |
 | Dheeraj S | CB.SC.U4AIE24050 |
-| Raaman Namputhiri | CB.SC.U4AIE24149 |
+| Raaman Namputhiri | CB.SC.U4AIE24148 |
 | Jyothsna | CB.SC.U4AIE24117 |
 ---
 
