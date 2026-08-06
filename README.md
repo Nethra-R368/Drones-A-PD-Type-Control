@@ -11,7 +11,7 @@
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2025b-orange.svg)](https://www.mathworks.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Group-D4 | Mathematics for Computing – 4 | Amrita Vishwa Vidyapeetham**
+**Group-AB02 | INTRODUCTION TO DRONES | Amrita Vishwa Vidyapeetham**
 
 </div>
 
