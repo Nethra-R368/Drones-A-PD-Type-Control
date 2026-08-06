@@ -21,11 +21,10 @@
 
 | Name | Roll Number |
 |------|------------|
-| Abdul Azhar Jamesh | CB.SC.U4AIE24301 |
-| Deepak Prabhu R | CB.SC.U4AIE24312 |
-| Pranesh M | CB.SC.U4AIE24345 |
-| Sandhiya D | CB.SC.U4AIE24353 |
-
+| Nethra R | CB.SC.U4AIE24147 |
+| Dheeraj S | CB.SC.U4AIE24050 |
+| Raaman Namputhiri | CB.SC.U4AIE24149 |
+| Jyotsna | CB.SC.U4AIE24117 |
 ---
 
 ## Table of Contents
