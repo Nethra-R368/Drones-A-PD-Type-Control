@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rigid Body Attitude Control Simulation</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Styling -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Three.js and OrbitControls for 3D simulation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Chart.js for real-time plots -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+        <div class="logo-text">
+          <h1>Spacecraft ACS</h1>
+          <span>Rigid Body Spacecraft Attitude Control Simulator</span>
+        </div>
+      </div>
+      <div class="paper-reference">
+        <span class="ref-badge">IEEE Access 2022</span>
+        <span class="ref-title">"A Simple Structure Constrained Attitude Control for Rigid Bodies: A PD-Type Control"</span>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+      
+      <!-- Left Column: Controls & Configuration -->
+      <section class="panel control-panel glass">
+        <div class="panel-header">
+          <h2>Simulation Controls</h2>
+          <span class="pulse-indicator green"></span>
+        </div>
+        
+        <!-- Preset Scenarios -->
+        <div class="control-group">
+          <label class="group-label">Preset Scenarios</label>
+          <div class="scenario-buttons">
+            <button id="btn-preset-1" class="scenario-btn active">Part 1 (T<sub>f</sub> = 15s)</button>
+            <button id="btn-preset-2" class="scenario-btn">Part 1 (T<sub>f</sub> = 10s)</button>
+            <button id="btn-preset-3" class="scenario-btn">Part 2 (Constrained)</button>
+            <button id="btn-preset-4" class="scenario-btn">Part 2 (Conventional)</button>
+          </div>
+        </div>
+
+        <!-- Controller Mode -->
+        <div class="control-group">
+          <label class="group-label" for="control-mode">Controller Mode</label>
+          <div class="toggle-container">
+            <button id="mode-constrained" class="toggle-btn active">Constrained PD-like</button>
+            <button id="mode-conventional" class="toggle-btn">Conventional PD</button>
+          </div>
+        </div>
+
+        <!-- Parameters Sliders -->
+        <div class="control-group scrollable-controls">
+          <label class="group-label">Controller & FTPPF Parameters</label>
+          
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Settling Time (T<sub>f</sub> / T<sub>s</sub>)</span>
+              <span id="val-Ts" class="param-val">15.0 s</span>
+            </div>
+            <input type="range" id="input-Ts" min="5" max="30" step="0.5" value="15">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Proportional Gain (K<sub>p</sub>)</span>
+              <span id="val-Kp" class="param-val">40.0</span>
+            </div>
+            <input type="range" id="input-Kp" min="5" max="100" step="1" value="40">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Derivative Gain (K<sub>d</sub>)</span>
+              <span id="val-Kd" class="param-val">20.0</span>
+            </div>
+            <input type="range" id="input-Kd" min="5" max="50" step="0.5" value="20">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Constrained Gain &alpha;</span>
+              <span id="val-alpha" class="param-val">1.5</span>
+            </div>
+            <input type="range" id="input-alpha" min="0.1" max="5.0" step="0.1" value="1.5">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Constrained Gain &beta;</span>
+              <span id="val-beta" class="param-val">1.2</span>
+            </div>
+            <input type="range" id="input-beta" min="0.1" max="5.0" step="0.1" value="1.2">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Coupling Coefficient (c)</span>
+              <span id="val-c" class="param-val">1.0</span>
+            </div>
+            <input type="range" id="input-c" min="0.1" max="3.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Adaptation Rate (&eta;<sub>1</sub>)</span>
+              <span id="val-eta1" class="param-val">0.1</span>
+            </div>
+            <input type="range" id="input-eta1" min="0.01" max="1.0" step="0.01" value="0.1">
+          </div>
+
+          <div class="parameter-row">
+            <div class="param-header">
+              <span class="param-title">Torque Limit (u<sub>max</sub>)</span>
+              <span id="val-umax" class="param-val">2.5 Nm</span>
+            </div>
+            <input type="range" id="input-umax" min="0.5" max="10.0" step="0.1" value="2.5">
+          </div>
+        </div>
+
+        <!-- Initial Conditions -->
+        <div class="control-group">
+          <label class="group-label">Initial Attitude & Velocity</label>
+          <div class="inputs-grid">
+            <div class="input-subgroup">
+              <span>q<sub>v</sub>(0)</span>
+              <div class="subgroup-row">
+                <input type="number" id="init-q1" step="0.01" value="0.2" class="num-input">
+                <input type="number" id="init-q2" step="0.01" value="-0.15" class="num-input">
+                <input type="number" id="init-q3" step="0.01" value="-0.25" class="num-input">
+              </div>
+            </div>
+            <div class="input-subgroup">
+              <span>&omega;(0) [rad/s]</span>
+              <div class="subgroup-row">
+                <input type="number" id="init-w1" step="0.005" value="0.03" class="num-input">
+                <input type="number" id="init-w2" step="0.005" value="0.02" class="num-input">
+                <input type="number" id="init-w3" step="0.005" value="-0.01" class="num-input">
+              </div>
+            </div>
+          </div>
+          <button id="btn-apply-states" class="action-btn secondary">Apply & Reset</button>
+        </div>
+      </section>
+
+      <!-- Middle Column: 3D Render & Simulation Telemetry -->
+      <section class="middle-column">
+        
+        <!-- 3D Spacecraft Viewport -->
+        <div class="panel panel-3d glass">
+          <div class="panel-header">
+            <h2>3D Attitude Visualization</h2>
+            <div class="view-controls">
+              <button id="btn-toggle-grid" class="icon-btn tooltip" data-tooltip="Toggle Grid">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+              </button>
+              <button id="btn-reset-camera" class="icon-btn tooltip" data-tooltip="Reset Camera">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="three-container" class="canvas-container"></div>
+          
+          <!-- Simulation Playback Bar -->
+          <div class="playback-controls">
+            <button id="btn-play-pause" class="play-btn">
+              <!-- Play Icon -->
+              <svg id="svg-play" class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <!-- Pause Icon (hidden initially) -->
+              <svg id="svg-pause" class="icon hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <button id="btn-reset" class="icon-btn tooltip" data-tooltip="Reset Sim">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+            
+            <div class="scrubber-container">
+              <span class="time-label" id="sim-time">0.00s</span>
+              <input type="range" id="sim-scrubber" min="0" max="20" step="0.05" value="0" class="scrubber">
+              <span class="time-label" id="max-time">20.00s</span>
+            </div>
+
+            <div class="speed-control">
+              <select id="sim-speed">
+                <option value="0.25">0.25x</option>
+                <option value="0.5">0.5x</option>
+                <option value="1" selected>1.0x</option>
+                <option value="2">2.0x</option>
+                <option value="5">5.0x</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry HUD -->
+        <div class="panel hud-panel glass">
+          <div class="hud-item">
+            <span class="hud-label">Quaternion (q)</span>
+            <span class="hud-value" id="hud-q">[0.200, -0.150, -0.250, 0.935]</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Angular Velocity (&omega;)</span>
+            <span class="hud-value" id="hud-w">[0.030, 0.020, -0.010] rad/s</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Control Torque (u)</span>
+            <span class="hud-value" id="hud-u">[0.000, 0.000, 0.000] Nm</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Adaptation (&theta;&#770;)</span>
+            <span class="hud-value" id="hud-theta">0.000</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Real-Time Interactive Charts -->
+      <section class="panel chart-panel glass">
+        <div class="panel-header">
+          <h2>Performance Analysis</h2>
+          <div class="chart-tab-buttons">
+            <button id="tab-q" class="tab-btn active">Attitude (q)</button>
+            <button id="tab-w" class="tab-btn">Velocity (&omega;)</button>
+            <button id="tab-u" class="tab-btn">Torque (u)</button>
+            <button id="tab-theta" class="tab-btn">Adaptation</button>
+          </div>
+        </div>
+        
+        <!-- Dynamic active chart container -->
+        <div class="chart-container">
+          <canvas id="performance-chart"></canvas>
+        </div>
+
+        <div class="charts-overview">
+          <p class="chart-description">
+            <strong id="desc-title">Attitude Quaternion tracking error vs FTPPF bounds</strong>:
+            <span id="desc-body">The vector components of the quaternion q<sub>v</sub> are kept strictly within the time-varying finite-time boundary &plusmn;&rho;<sub>q</sub>(t) (shown as dashed lines). Notice how the boundary converges dynamically at T<sub>f</sub>.</span>
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Mathematical Details Modal/Section -->
+    <section class="info-section glass">
+      <h3>Control Methodology Overview</h3>
+      <div class="info-grid">
+        <div class="info-block">
+          <h4>Finite-Time PPF (FTPPF)</h4>
+          <p>
+            $$\rho(t) = \begin{cases} (\rho_0 - \rho_T(1 + t/T_s))\exp(\kappa t/(t - T_s)) + \rho_T, & 0 \le t < T_s \\ \rho_T, & t \ge T_s \end{cases}$$
+            This defines a predefined performance envelope that converges precisely in finite time $T_s$.
+          </p>
+        </div>
+        <div class="info-block">
+          <h4>Constrained PD Controller</h4>
+          <p>
+            $$u = -K_p q_v - K_d \omega - u_{cons}$$
+            $$u_{cons} = \left[ \alpha(I - E_1)^{-2} + \beta(I - E_2)^{-2} \right] s + \hat{\theta}\text{sat}(s/\varsigma)$$
+            As states approach their boundaries, $E_1, E_2 \to I$, causing the barrier term to grow and steer the spacecraft back inside the envelope.
+          </p>
+        </div>
+        <div class="info-block">
+          <h4>Adaptive Disturbance Estimation</h4>
+          <p>
+            $$\dot{\hat{\theta}} = \frac{1}{\eta_1} \left( \|s\| - \eta_2 \hat{\theta} \right)$$
+            $$\eta_2 = 2 \exp(-0.5t)$$
+            Compensates for time-varying disturbances $d(t)$ and actuator saturation effects without prior knowledge of their bounds.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Load simulation scripts -->
+  <script src="simulation.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Load MathJax for beautiful LaTeX formulas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+  </script>
+</body>
+</html>
