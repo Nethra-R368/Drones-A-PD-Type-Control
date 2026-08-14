@@ -2,7 +2,7 @@
   <img src="amrita.png" alt="Logo" width="400"/>
 </p>
 
-# Extremely Low-Bit Neural Networks: Squeeze the Last Bit Out with ADMM
+#A Simple Structure Constrained Attitude Control for Rigid Bodies: A PD-Type Control
 
 <div align="center">
 
