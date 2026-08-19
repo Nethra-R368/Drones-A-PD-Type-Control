@@ -3,39 +3,21 @@
 # ================================================================
 #
 # TEAM MEMBERS
+# 1. Nethra R          - CB.SC.U4AIE24147
+# 2. Dheeraj S         - CB.SC.U4AIE24050
+# 3. Raaman Namputhiri - CB.SC.U4AIE24148
 #
-# 1. Nethra R
-#    Roll No: CB.SC.U4AIE24147
+# TEAM CONTRIBUTION TRACK
+# Nethra R          : ROS2/Gazebo integration and state processing
+# Dheeraj S         : FTPPF, constrained controller and adaptive estimator
+# Raaman Namputhiri : safety, disturbance handling and performance analysis
 #
-# 2. Dheeraj S
-#    Roll No: CB.SC.U4AIE24050
-#
-# 3. Raaman Namputhiri
-#    Roll No: CB.SC.U4AIE24148
-#
+# NOTE:
+# Each member's changes are intended to be committed from that member's
+# own GitHub account. Do not use these comments as a substitute for
+# genuine contribution/commit history.
 # ================================================================
-#                    TEAM CONTRIBUTIONS
-# ================================================================
-#
-# NETHRA R
-# - ROS2 and Gazebo integration
-# - Drone pose acquisition
-# - Quaternion/state processing
-# - Motor command publishing
-#
-# DHEERAJ S
-# - FTPPF implementation
-# - Constrained controller design
-# - Sliding variable formulation
-# - Adaptive disturbance estimator
-#
-# RAAMAN NAMPUTHIRI
-# - Altitude control
-# - Thrust and torque safety constraints
-# - Disturbance injection
-# - Motor mixing and performance analysis
-#
-# ================================================================
+
 import rclpy
 from rclpy.node import Node
 
@@ -156,6 +138,17 @@ class ConstrainedPaperController(Node):
 
         self.initialized = False
 
+        # ============================================================
+        # NETHRA R — STATE MONITORING
+        # Keep a structured snapshot of the latest Gazebo state.
+        # ============================================================
+        self.current_state = {
+            'time': 0.0,
+            'altitude': 0.0,
+            'quaternion': np.array([0.0, 0.0, 0.0, 1.0]),
+            'angular_velocity': np.zeros(3)
+        }
+
         self.last_z = 0.0
 
         self.last_q = np.array(
@@ -239,6 +232,19 @@ class ConstrainedPaperController(Node):
         self.get_logger().info(
             '============================================'
         )
+
+    # ================================================================
+    # NETHRA R — STATE ACCESSOR
+    # ================================================================
+
+    def get_drone_state(self):
+        """Return the latest processed drone state."""
+        return {
+            'time': self.current_state['time'],
+            'altitude': self.current_state['altitude'],
+            'quaternion': self.current_state['quaternion'].copy(),
+            'angular_velocity': self.current_state['angular_velocity'].copy()
+        }
 
     # ================================================================
     # FTPPF
@@ -430,6 +436,16 @@ class ConstrainedPaperController(Node):
             -3.0,
             3.0
         )
+
+        # ============================================================
+        # NETHRA R — UPDATE STATE SNAPSHOT
+        # ============================================================
+        self.current_state = {
+            'time': float(elapsed),
+            'altitude': float(z),
+            'quaternion': q.copy(),
+            'angular_velocity': omega.copy()
+        }
 
         # ============================================================
         # ALTITUDE TARGET
