@@ -39,6 +39,18 @@ class ConstrainedPaperController(Node):
         # KEEP FALSE FOR THE FIRST STABILITY TEST
         self.inject_wind_disturbance = False
 
+        # Disturbance-test configuration
+        # Supported modes: 'sinusoidal' and 'pulse'
+        self.disturbance_mode = 'sinusoidal'
+        self.disturbance_start_time = 10.0
+        self.disturbance_duration = 20.0
+
+        # Disturbance amplitudes for roll, pitch and yaw.
+        self.disturbance_amplitude = np.array(
+            [0.05, 0.10, 0.15],
+            dtype=float
+        )
+
         # Run for at least 180 seconds
         self.experiment_duration = 180.0
 
@@ -155,6 +167,7 @@ class ConstrainedPaperController(Node):
         self.log_thrust = []
 
         self.log_disturbance = []
+        self.log_disturbance_norm = []
 
         # ============================================================
         # LOG FILE
@@ -195,7 +208,11 @@ class ConstrainedPaperController(Node):
         )
 
         self.get_logger().info(
-            'WIND: OFF'
+            f'WIND: {"ON" if self.inject_wind_disturbance else "OFF"}'
+        )
+
+        self.get_logger().info(
+            f'DISTURBANCE MODE: {self.disturbance_mode}'
         )
 
         self.get_logger().info(
@@ -262,6 +279,40 @@ class ConstrainedPaperController(Node):
             )
 
         return q / n
+
+    # ================================================================
+    # DISTURBANCE GENERATOR
+    # ================================================================
+
+    def generate_disturbance(self, elapsed):
+        """Generate the configured test disturbance."""
+        disturbance = np.zeros(3)
+
+        if not self.inject_wind_disturbance:
+            return disturbance
+
+        start = self.disturbance_start_time
+        end = start + self.disturbance_duration
+
+        if elapsed < start or elapsed > end:
+            return disturbance
+
+        tau = elapsed - start
+        amp = self.disturbance_amplitude
+
+        if self.disturbance_mode == 'pulse':
+            # Constant disturbance during the test window.
+            disturbance = amp.copy()
+
+        else:
+            # Smooth sinusoidal disturbance.
+            disturbance = np.array([
+                amp[0] * np.sin(tau),
+                amp[1] * np.sin(1.2 * tau),
+                amp[2] * np.sin(1.5 * tau)
+            ])
+
+        return disturbance
 
     # ================================================================
     # MAIN CALLBACK
@@ -669,24 +720,9 @@ class ConstrainedPaperController(Node):
         # OFF for the first 3-minute hover test.
         # ============================================================
 
-        disturbance = np.zeros(3)
+        disturbance = self.generate_disturbance(elapsed)
 
-        if (
-            self.inject_wind_disturbance
-            and
-            elapsed > 10.0
-        ):
-
-            disturbance = np.array([
-                0.05 * np.sin(elapsed),
-                0.10 * np.sin(
-                    1.2 * elapsed
-                ),
-                0.15 * np.sin(
-                    1.5 * elapsed
-                )
-            ])
-
+        if np.any(disturbance):
             u += disturbance
 
         # ============================================================
@@ -895,6 +931,10 @@ class ConstrainedPaperController(Node):
             disturbance.copy()
         )
 
+        self.log_disturbance_norm.append(
+            float(np.linalg.norm(disturbance))
+        )
+
         # ============================================================
         # TERMINAL STATUS
         # ============================================================
@@ -1000,6 +1040,10 @@ class ConstrainedPaperController(Node):
 
                 disturbance=np.asarray(
                     self.log_disturbance
+                ),
+
+                disturbance_norm=np.asarray(
+                    self.log_disturbance_norm
                 )
             )
 
