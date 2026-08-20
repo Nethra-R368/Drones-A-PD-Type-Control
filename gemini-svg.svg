@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" width="100%" height="100%">
+  <defs>
+    <style>
+      .box { rx: 8px; ry: 8px; stroke-width: 2px; }
+      .text-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: bold; }
+      .text-body { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 11.5px; }
+      .arrow { stroke: #475569; stroke-width: 1.75px; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="100%" height="100%" fill="#ffffff" />
+
+  <!-- Envelopes -->
+  <rect x="280" y="20" width="400" height="70" class="box" fill="#FEF3C7" stroke="#D97706" />
+  <text x="480" y="45" text-anchor="middle" class="text-title" fill="#92400E">Finite-Time Prescribed Envelopes (FTPPF)</text>
+  <text x="480" y="68" text-anchor="middle" class="text-body" fill="#B45309">ρ_q(t) = FTPPF(ρ_q0, ρ_qT, Ts),  ρ_ω(t)</text>
+
+  <!-- Ground Truth Topic -->
+  <rect x="30" y="130" width="250" height="65" class="box" fill="#F1F5F9" stroke="#64748B" />
+  <text x="155" y="155" text-anchor="middle" class="text-title" fill="#334155">Gazebo Pose Topic</text>
+  <text x="155" y="176" text-anchor="middle" class="text-body" fill="#475569">/world/quadcopter/dynamic_pose/info</text>
+
+  <!-- State Estimation -->
+  <rect x="340" y="130" width="220" height="65" class="box" fill="#E0F2FE" stroke="#0284C7" />
+  <text x="450" y="155" text-anchor="middle" class="text-title" fill="#0369A1">State Estimation &amp; Filtering</text>
+  <text x="450" y="176" text-anchor="middle" class="text-body" fill="#0284C7">q_v, ω, z, z_dot</text>
+
+  <!-- Error Normalizer -->
+  <rect x="620" y="130" width="230" height="65" class="box" fill="#E0F2FE" stroke="#0284C7" />
+  <text x="735" y="155" text-anchor="middle" class="text-title" fill="#0369A1">Error Normalizer</text>
+  <text x="735" y="176" text-anchor="middle" class="text-body" fill="#0284C7">ε_1 = q_v / ρ_q(t),  ε_2 = ω / ρ_ω(t)</text>
+
+  <!-- Nominal PD -->
+  <rect x="30" y="245" width="280" height="65" class="box" fill="#EDE9FE" stroke="#7C3AED" />
+  <text x="170" y="270" text-anchor="middle" class="text-title" fill="#5B21B6">Nominal PD Controller</text>
+  <text x="170" y="291" text-anchor="middle" class="text-body" fill="#6D28D9">u_nom = -K_p·q_v - K_d·ω</text>
+
+  <!-- Nonlinear Barrier Term -->
+  <rect x="580" y="245" width="310" height="65" class="box" fill="#EDE9FE" stroke="#7C3AED" />
+  <text x="735" y="270" text-anchor="middle" class="text-title" fill="#5B21B6">Non-Linear Barrier Control</text>
+  <text x="735" y="291" text-anchor="middle" class="text-body" fill="#6D28D9">u_cons = [α·B_q + β·B_ω] · s</text>
+
+  <!-- Adaptive Estimator -->
+  <rect x="30" y="355" width="280" height="65" class="box" fill="#EDE9FE" stroke="#7C3AED" />
+  <text x="170" y="380" text-anchor="middle" class="text-title" fill="#5B21B6">Adaptive Estimator</text>
+  <text x="170" y="401" text-anchor="middle" class="text-body" fill="#6D28D9">θ_dot = (1/η_1)(||s|| - η_2·θ_hat)</text>
+
+  <!-- Control Summation -->
+  <rect x="380" y="355" width="180" height="65" class="box" fill="#FEE2E2" stroke="#EF4444" />
+  <text x="470" y="380" text-anchor="middle" class="text-title" fill="#991B1B">Summation</text>
+  <text x="470" y="401" text-anchor="middle" class="text-body" fill="#B91C1C">u = u_nom - u_cons</text>
+
+  <!-- Saturation Clamping -->
+  <rect x="630" y="355" width="260" height="65" class="box" fill="#FEE2E2" stroke="#EF4444" />
+  <text x="760" y="380" text-anchor="middle" class="text-title" fill="#991B1B">Actuator Saturation</text>
+  <text x="760" y="401" text-anchor="middle" class="text-body" fill="#B91C1C">τ = clip(u, -u_max, +u_max)</text>
+
+  <!-- Altitude Controller -->
+  <rect x="30" y="465" width="360" height="65" class="box" fill="#EDE9FE" stroke="#7C3AED" />
+  <text x="210" y="490" text-anchor="middle" class="text-title" fill="#5B21B6">Altitude PD &amp; Tilt Compensator</text>
+  <text x="210" y="511" text-anchor="middle" class="text-body" fill="#6D28D9">T_total = m(g + Kpz·e_z - Kdz·v_z) / cos(tilt)</text>
+
+  <!-- Motor Allocation Mixer -->
+  <rect x="180" y="570" width="600" height="95" class="box" fill="#DCFCE7" stroke="#16A34A" />
+  <text x="480" y="595" text-anchor="middle" class="text-title" fill="#166534">Motor Allocation Mixer (ω_i = √m_i)</text>
+  <text x="480" y="618" text-anchor="middle" class="text-body" fill="#15803D">m1,2 = T/4c_T ± τ_2/4c_T·l - τ_1/4c_T·l ∓ τ_3/4c_Q</text>
+  <text x="480" y="642" text-anchor="middle" class="text-body" fill="#15803D">m3,4 = T/4c_T ∓ τ_2/4c_T·l + τ_1/4c_T·l ∓ τ_3/4c_Q</text>
+
+  <!-- ROS 2 Command -->
+  <rect x="300" y="695" width="360" height="45" class="box" fill="#F1F5F9" stroke="#64748B" />
+  <text x="480" y="722" text-anchor="middle" class="text-body" fill="#334155">/X3/gazebo/command/motor_speed (Actuators msg)</text>
+
+  <!-- Connectors -->
+  <path d="M 280 162.5 L 340 162.5" class="arrow" />
+  <path d="M 480 90 L 480 110 L 735 110 L 735 130" class="arrow" />
+  <path d="M 560 162.5 L 620 162.5" class="arrow" />
+  
+  <path d="M 450 195 L 450 220 L 170 220 L 170 245" class="arrow" />
+  <path d="M 735 195 L 735 245" class="arrow" />
+
+  <path d="M 170 310 L 170 330 L 420 330 L 420 355" class="arrow" />
+  <path d="M 735 310 L 735 330 L 520 330 L 520 355" class="arrow" />
+  <path d="M 170 355 L 170 330" class="arrow" />
+
+  <path d="M 560 387.5 L 630 387.5" class="arrow" />
+  <path d="M 760 420 L 760 570" class="arrow" />
+  <path d="M 390 497.5 L 480 497.5 L 480 570" class="arrow" />
+
+  <path d="M 480 665 L 480 695" class="arrow" />
+</svg>
