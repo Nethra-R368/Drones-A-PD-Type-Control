@@ -2,14 +2,10 @@
   <img src="amrita.png" alt="Logo" width="400"/>
 </p>
 
-#A Simple Structure Constrained Attitude Control for Rigid Bodies: A PD-Type Control
+# A Simple Structure Constrained Attitude Control for Rigid Bodies: A PD-Type Control
 
 <div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
-[![MATLAB](https://img.shields.io/badge/MATLAB-R2025b-orange.svg)](https://www.mathworks.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Group-AB02 | INTRODUCTION TO DRONES | Amrita Vishwa Vidyapeetham**
 
