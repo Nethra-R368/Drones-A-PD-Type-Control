@@ -158,36 +158,65 @@ $$|\epsilon_{1i}(t)| < 1 \quad \text{and} \quad |\epsilon_{2i}(t)| < 1, \quad \f
 
 guarantees that the vehicle's attitude quaternion and angular velocity components remain strictly confined within the predefined transient and steady-state boundaries ($-\rho_q(t) < q_i(t) < \rho_q(t)$ and $-\rho_\omega(t) < \omega_i(t) < \rho_\omega(t)$) for all $t \ge 0$.
 
-#### 3.1.5 Constrained PD-Type Control Law and Adaptive Law
+### 3.1.5 Constrained PD-Type Control Law and Adaptive Law
 
 The control torque command $u \in \mathbb{R}^3$ comprises a nominal proportional-derivative (PD) tracking term, a barrier penalty vector to enforce state constraints, and an adaptive robust component to counteract lumped actuator saturation and environmental disturbances:
 
-$$u = -k_p q_v - k_d \omega - u_{cons}$$
+$$
+u = -k_p q_v - k_d \omega - u_{cons}
+$$
 
-The auxiliary barrier control component $u_{cons} \in \mathbb{R}^3$ is evaluated component-wise for each axis $i \in \{1, 2, 3\}$ as:
+The auxiliary barrier control component $u_{cons} \in \mathbb{R}^3$ is evaluated component-wise for each axis $i \in \{1,2,3\}$ as:
 
-$$u_{cons, i} = \left[ \frac{\alpha}{(1 - \epsilon_{1i}^2)^2} + \frac{\beta}{(1 - \epsilon_{2i}^2)^2} \right] s_i + \hat{\theta} \operatorname{sat}\left(\frac{s_i}{\varsigma}\right)$$
+$$
+u_{cons,i}
+=
+\left[
+\frac{\alpha}{(1-\epsilon_{1i}^2)^2}
++
+\frac{\beta}{(1-\epsilon_{2i}^2)^2}
+\right]s_i
++
+\hat{\theta}\,\mathrm{sat}\left(\frac{s_i}{\varsigma}\right)
+$$
 
 Where:
-* $k_p > 0$ and $k_d > 0$ are the nominal proportional and derivative feedback gains.
-* $\alpha > 0$ and $\beta > 0$ are design weighting parameters that penalize proximity to the performance boundaries $\rho_q(t)$ and $\rho_\omega(t)$.
-* $s = \omega + c q_v \in \mathbb{R}^3$ (with $c > 0$) is the composite sliding surface vector.
-* $\operatorname{sat}(s_i / \varsigma)$ is a continuous boundary-layer saturation function parameterised by slope parameter $\varsigma > 0$ to eliminate chattering:
 
-$$\operatorname{sat}\left(\frac{s_i}{\varsigma}\right) = \begin{cases} 1, & s_i > \varsigma \\ \frac{s_i}{\varsigma}, & |s_i| \le \varsigma \\ -1, & s_i < -\varsigma \end{cases}$$
+- $k_p > 0$ and $k_d > 0$ are the nominal proportional and derivative feedback gains.
+- $\alpha > 0$ and $\beta > 0$ are design weighting parameters that penalize proximity to the performance boundaries $\rho_q(t)$ and $\rho_\omega(t)$.
+- $s = \omega + c q_v \in \mathbb{R}^3$ with $c > 0$ is the composite sliding surface vector.
+- $\mathrm{sat}(s_i/\varsigma)$ is a continuous boundary-layer saturation function parameterized by the slope parameter $\varsigma > 0$ to eliminate chattering:
 
-* $\hat{\theta} \in \mathbb{R}$ is the online estimate of the unknown lumped disturbance-saturation upper bound, updated dynamically via:
+$$
+\mathrm{sat}\left(\frac{s_i}{\varsigma}\right)
+=
+\begin{cases}
+1, & s_i > \varsigma \\
+\frac{s_i}{\varsigma}, & |s_i| \leq \varsigma \\
+-1, & s_i < -\varsigma
+\end{cases}
+$$
 
-$$\dot{\hat{\theta}} = \frac{1}{\eta_1}\left(\|s\| - \eta_2(t)\hat{\theta}\right)$$
+- $\hat{\theta} \in \mathbb{R}$ is the online estimate of the unknown lumped disturbance-saturation upper bound, updated dynamically via:
 
-with adaptation gain $\eta_1 > 0$ and time-varying leakage rate $\eta_2(t) = \max\left(2\exp(-0.5t), 0.1\right)$.
+$$
+\dot{\hat{\theta}}
+=
+\frac{1}{\eta_1}
+\left(
+\|s\|-\eta_2(t)\hat{\theta}
+\right)
+$$
 
----
+where $\eta_1 > 0$ is the adaptation gain and the time-varying leakage rate is:
 
-<div align="center">
-  <img src="docs/architecture_pipeline.svg" alt="Control Architecture Pipeline" width="850"/>
-  <p><em>Figure: Closed-Loop Constrained Control and Motor Allocation Architecture</em></p>
-</div>
+$$
+\eta_2(t)
+=
+\max\left(2\exp(-0.5t),0.1\right)
+$$
+
+
 ### 3.2 Practical Execution and System Architecture on Gazebo
 
 The theoretical attitude control law was deployed on an **X3 Quadcopter** in Gazebo via ROS 2. Because an underactuated multirotor requires continuous thrust generation alongside attitude stabilization to stay aloft, the framework couples the attitude barrier control with vertical altitude tracking and rotor thrust mixing.
