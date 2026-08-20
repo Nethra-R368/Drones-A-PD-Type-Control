@@ -91,28 +91,29 @@ Where $\rho_0$ sets the initial envelope boundary, $\rho_T$ is the steady-state 
 The control objective is to stabilize the orientation of a rigid body while simultaneously guaranteeing that both the attitude quaternion and angular velocity remain strictly within predefined transient and steady-state boundaries under actuator physical limitations[cite: 1, 2].
 
 #### 3.1.1 Rigid Body Kinematics and Dynamic Model
-Let the rigid body orientation in the body-fixed reference frame $\mathcal{F}_b$ relative to the inertial reference frame $\mathcal{F}_i$ be represented using the unit quaternion vector $q \in \mathbb{R}^4$[cite: 1, 2]:
 
-$$q = \begin{bmatrix} q_v \\ q_4 \end{bmatrix} = \begin{bmatrix} q_1 \\ q_2 \\ q_3 \\ q_4 \end{bmatrix} \in \mathbb{R}^4, \quad \text{subject to } q^T q = \|q_v\|^2 + q_4^2 = 1$$[cite: 1, 2]
+Let the rigid body orientation in the body-fixed reference frame $\mathcal{F}_b$ relative to the inertial reference frame $\mathcal{F}_i$ be represented using the unit quaternion vector $q \in \mathbb{R}^4$:
 
-Where $q_v = [q_1, q_2, q_3]^T \in \mathbb{R}^3$ denotes the vector component and $q_4 \in \mathbb{R}$ represents the scalar component of the quaternion[cite: 1, 2]. 
+$$q = \begin{bmatrix} q_v \\ q_4 \end{bmatrix} = \begin{bmatrix} q_1 \\ q_2 \\ q_3 \\ q_4 \end{bmatrix} \in \mathbb{R}^4, \quad \text{subject to } q^T q = \|q_v\|^2 + q_4^2 = 1$$
 
-The rotational kinematics and dynamics of the rigid body are expressed as[cite: 1, 2]:
+Where $q_v = [q_1, q_2, q_3]^T \in \mathbb{R}^3$ denotes the vector component and $q_4 \in \mathbb{R}$ represents the scalar component of the quaternion.
 
-$$\dot{q}_v = \frac{1}{2}(q_4 I_3 + q_v^\times)\omega$$[cite: 1, 2]
+The rotational kinematics and dynamics of the rigid body are expressed as:
 
-$$\dot{q}_4 = -\frac{1}{2}q_v^T \omega$$[cite: 1, 2]
+$$\dot{q}_v = \frac{1}{2}(q_4 I_3 + q_v^\times)\omega$$
 
-$$J\dot{\omega} = -\omega^\times J \omega + sat(u) + d$$[cite: 1, 2]
+$$\dot{q}_4 = -\frac{1}{2}q_v^T \omega$$
+
+$$J\dot{\omega} = -\omega^\times J \omega + sat(u) + d$$
 
 Where:
-* $\omega = [\omega_1, \omega_2, \omega_3]^T \in \mathbb{R}^3$ is the angular rotation velocity vector of $\mathcal{F}_b$ with respect to $\mathcal{F}_i$ expressed in $\mathcal{F}_b$[cite: 1, 2].
-* $J \in \mathbb{R}^{3 \times 3}$ is the symmetric, positive-definite inertia matrix[cite: 1, 2].
-* $u = [u_1, u_2, u_3]^T \in \mathbb{R}^3$ is the control torque command[cite: 1, 2].
-* $d = [d_1, d_2, d_3]^T \in \mathbb{R}^3$ is the unknown external disturbance vector bounded by $\|d\| \le \tilde{d}$[cite: 1, 2].
-* $(\cdot)^\times$ is the skew-symmetric cross-product matrix defined for any vector $z = [z_1, z_2, z_3]^T$ as[cite: 1, 2]:
+* $\omega = [\omega_1, \omega_2, \omega_3]^T \in \mathbb{R}^3$ is the angular rotation velocity vector of $\mathcal{F}_b$ with respect to $\mathcal{F}_i$ expressed in $\mathcal{F}_b$.
+* $J \in \mathbb{R}^{3 \times 3}$ is the symmetric, positive-definite inertia matrix.
+* $u = [u_1, u_2, u_3]^T \in \mathbb{R}^3$ is the control torque command.
+* $d = [d_1, d_2, d_3]^T \in \mathbb{R}^3$ is the unknown external disturbance vector bounded by $\|d\| \le \tilde{d}$.
+* $(\cdot)^\times$ is the skew-symmetric cross-product matrix operator defined for any vector $z = [z_1, z_2, z_3]^T$ as:
 
-$$z^\times = \begin{bmatrix} 0 & -z_3 & z_2 \\ z_3 & 0 & -z_1 \\ -z_2 & z_1 & 0 \end{bmatrix}$$[cite: 1, 2]
+$$z^\times = \begin{bmatrix} 0 & -z_3 & z_2 \\ z_3 & 0 & -z_1 \\ -z_2 & z_1 & 0 \end{bmatrix}$$
 
 #### 3.1.2 Actuator Saturation Modeling
 Actuators possess physical limits and cannot supply infinite torque[cite: 1, 2]. The actual control torque $sat(u)$ supplied to the rigid vehicle is modeled as[cite: 1, 2]:
@@ -141,32 +142,52 @@ Where:
 * $\kappa > 0$ controls the initial rate of envelope decay[cite: 1, 2].
 
 #### 3.1.4 Error Normalization and Barrier Transform
-Normalized state error metrics are defined as[cite: 1, 2]:
 
-$$\epsilon_1 = \frac{1}{\rho_q(t)} q_v(t) = \begin{bmatrix} \epsilon_{11} \\ \epsilon_{12} \\ \epsilon_{13} \end{bmatrix}, \quad \epsilon_2 = \frac{1}{\rho_\omega(t)} \omega(t) = \begin{bmatrix} \epsilon_{21} \\ \epsilon_{22} \\ \epsilon_{23} \end{bmatrix}$$[cite: 1, 2]
+To monitor and constrain the rigid body states against their respective time-varying performance envelopes, the normalized error vectors $\epsilon_1(t) \in \mathbb{R}^3$ and $\epsilon_2(t) \in \mathbb{R}^3$ are defined component-wise as:
 
-Ensuring that $|\epsilon_{1i}(t)| < 1$ and $|\epsilon_{2i}(t)| < 1$ guarantees satisfaction of full-state constraints at all times[cite: 1, 2].
-
-#### 3.1.5 Constrained PD-Type Control Law and Adaptive Law
-The control law consists of a nominal PD feedback component, a barrier penalty term, and an adaptive robust compensator[cite: 1, 2]:
-
-$$u = -k_p q_v - k_d \omega - u_{cons}$$[cite: 1, 2]
-
-$$u_{cons} = \left[\alpha(1 - \epsilon_1^2)^{-2} + \beta(1 - \epsilon_2^2)^{-2}\right] s + \hat{\theta} \operatorname{sat}\left(\frac{s}{\varsigma}\right)$$[cite: 1, 2]
+$$\epsilon_1(t) = \frac{q_v(t)}{\rho_q(t)} = \begin{bmatrix} \epsilon_{11}(t) \\ \epsilon_{12}(t) \\ \epsilon_{13}(t) \end{bmatrix}, \quad \epsilon_2(t) = \frac{\omega(t)}{\rho_\omega(t)} = \begin{bmatrix} \epsilon_{21}(t) \\ \epsilon_{22}(t) \\ \epsilon_{23}(t) \end{bmatrix}$$
 
 Where:
-* $k_p > 0$ and $k_d > 0$ are the nominal proportional and derivative control gains[cite: 1, 2].
-* $\alpha > 0$ and $\beta > 0$ are weighting gains adjusting the repulsion force away from the $\rho_q$ and $\rho_\omega$ bounds[cite: 1, 2].
-* $s = \omega + c q_v$ (with $c > 0$) is the composite sliding surface vector[cite: 1, 2].
-* $\operatorname{sat}(s/\varsigma) = \operatorname{clip}(s/\varsigma, -1, 1)$ is a continuous boundary layer function replacing the discontinuous $\operatorname{sgn}(s)$ to eliminate chattering[cite: 1, 2].
-* $\hat{\theta}$ is the continuous online estimate of the lumped disturbance and saturation upper bound $\theta$, updated via the adaptive law[cite: 1, 2]:
+* $q_v(t) = [q_1(t), q_2(t), q_3(t)]^T$ is the vector component of the attitude quaternion.
+* $\omega(t) = [\omega_1(t), \omega_2(t), \omega_3(t)]^T$ is the body angular velocity vector.
+* $\rho_q(t)$ and $\rho_\omega(t)$ are the dynamic finite-time prescribed performance boundary values evaluated at time $t$.
 
-$$\dot{\hat{\theta}} = \frac{1}{\eta_1}\left(\|s\| - \eta_2(t) \hat{\theta}\right)$$[cite: 1, 2]
+By formulation, strictly satisfying the inequalities:
 
-With $\eta_1 > 0$ and the time-decaying regularization function $\eta_2(t) = \max\left(2\exp(-0.5t), 0.1\right)$[cite: 1, 2].
+$$|\epsilon_{1i}(t)| < 1 \quad \text{and} \quad |\epsilon_{2i}(t)| < 1, \quad \forall i \in \{1, 2, 3\}$$
+
+guarantees that the vehicle's attitude quaternion and angular velocity components remain strictly confined within the predefined transient and steady-state boundaries ($-\rho_q(t) < q_i(t) < \rho_q(t)$ and $-\rho_\omega(t) < \omega_i(t) < \rho_\omega(t)$) for all $t \ge 0$.
+
+#### 3.1.5 Constrained PD-Type Control Law and Adaptive Law
+
+The control torque command $u \in \mathbb{R}^3$ comprises a nominal proportional-derivative (PD) tracking term, a barrier penalty vector to enforce state constraints, and an adaptive robust component to counteract lumped actuator saturation and environmental disturbances:
+
+$$u = -k_p q_v - k_d \omega - u_{cons}$$
+
+The auxiliary barrier control component $u_{cons} \in \mathbb{R}^3$ is evaluated component-wise for each axis $i \in \{1, 2, 3\}$ as:
+
+$$u_{cons, i} = \left[ \frac{\alpha}{(1 - \epsilon_{1i}^2)^2} + \frac{\beta}{(1 - \epsilon_{2i}^2)^2} \right] s_i + \hat{\theta} \operatorname{sat}\left(\frac{s_i}{\varsigma}\right)$$
+
+Where:
+* $k_p > 0$ and $k_d > 0$ are the nominal proportional and derivative feedback gains.
+* $\alpha > 0$ and $\beta > 0$ are design weighting parameters that penalize proximity to the performance boundaries $\rho_q(t)$ and $\rho_\omega(t)$.
+* $s = \omega + c q_v \in \mathbb{R}^3$ (with $c > 0$) is the composite sliding surface vector.
+* $\operatorname{sat}(s_i / \varsigma)$ is a continuous boundary-layer saturation function parameterised by slope parameter $\varsigma > 0$ to eliminate chattering:
+
+$$\operatorname{sat}\left(\frac{s_i}{\varsigma}\right) = \begin{cases} 1, & s_i > \varsigma \\ \frac{s_i}{\varsigma}, & |s_i| \le \varsigma \\ -1, & s_i < -\varsigma \end{cases}$$
+
+* $\hat{\theta} \in \mathbb{R}$ is the online estimate of the unknown lumped disturbance-saturation upper bound, updated dynamically via:
+
+$$\dot{\hat{\theta}} = \frac{1}{\eta_1}\left(\|s\| - \eta_2(t)\hat{\theta}\right)$$
+
+with adaptation gain $\eta_1 > 0$ and time-varying leakage rate $\eta_2(t) = \max\left(2\exp(-0.5t), 0.1\right)$.
 
 ---
 
+<div align="center">
+  <img src="docs/architecture_pipeline.svg" alt="Control Architecture Pipeline" width="850"/>
+  <p><em>Figure: Closed-Loop Constrained Control and Motor Allocation Architecture</em></p>
+</div>
 ### 3.2 Practical Execution and System Architecture on Gazebo
 
 The theoretical attitude control law was deployed on an **X3 Quadcopter** in Gazebo via ROS 2. Because an underactuated multirotor requires continuous thrust generation alongside attitude stabilization to stay aloft, the framework couples the attitude barrier control with vertical altitude tracking and rotor thrust mixing.
